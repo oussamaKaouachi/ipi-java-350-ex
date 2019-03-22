@@ -80,9 +80,11 @@ public class Employe {
         int nbJoursAnnee = d.isLeapYear() ? 366 : 365;
         int nbJoursReposHebdomadaire = 104;
         switch (LocalDate.of(d.getYear(),1,1).getDayOfWeek()){
+            default: break;
             case THURSDAY: if(d.isLeapYear()) nbJoursReposHebdomadaire =  nbJoursReposHebdomadaire + 1; break;
             case FRIDAY: if(d.isLeapYear()) nbJoursReposHebdomadaire =  nbJoursReposHebdomadaire + 2; else nbJoursReposHebdomadaire =  nbJoursReposHebdomadaire + 1; break;
             case SATURDAY: nbJoursReposHebdomadaire = nbJoursReposHebdomadaire + 1; break;
+
         }
         int nbJoursFeries = (int) Entreprise.joursFeries(d).stream().filter(localDate -> localDate.getDayOfWeek().getValue() <= DayOfWeek.FRIDAY.getValue()).count();
         return (int) Math.ceil((nbJoursAnnee - Entreprise.NB_JOURS_MAX_FORFAIT - nbJoursReposHebdomadaire - Entreprise.NB_CONGES_BASE - nbJoursFeries) * tempsPartiel);
@@ -110,7 +112,7 @@ public class Employe {
             prime = Entreprise.primeAnnuelleBase() * Entreprise.INDICE_PRIME_MANAGER + primeAnciennete;
         }
         //Pour les autres employés en performance de base, uniquement la prime annuelle plus la prime d'ancienneté.
-        else if (this.performance == null || Entreprise.PERFORMANCE_BASE == this.performance){
+        else if (this.performance == null || Entreprise.PERFORMANCE_BASE.equals(this.performance)){
             prime = Entreprise.primeAnnuelleBase() + primeAnciennete;
         }
         //Pour les employés plus performance, on bonnifie la prime de base en multipliant par la performance de l'employé
@@ -123,14 +125,14 @@ public class Employe {
     }
 
 
-    public void augmenterSalaire(Integer pourcentage){
-
-        if (this.getSalaire() == 0) {}
-        else if(pourcentage <= 0){}
-        else {
-            this.setSalaire(this.getSalaire() + (this.getSalaire() * pourcentage / 100));
-        }
-    }
+//    public void augmenterSalaire(Integer pourcentage){
+//
+//        if (this.getSalaire() == 0) {}
+//        else if(pourcentage <= 0){}
+//        else {
+//            this.setSalaire(this.getSalaire() + (this.getSalaire() * pourcentage / 100));
+//        }
+//    }
 
     public Long getId() {
         return id;
