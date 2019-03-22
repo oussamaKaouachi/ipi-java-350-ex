@@ -1,1 +1,5 @@
 language: java
+
+addons:
+  sonarcloud:
+    organization: "oussamaKaouachi_ipi-java-350-ex"
