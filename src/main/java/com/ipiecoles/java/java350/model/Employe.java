@@ -44,7 +44,15 @@ public class Employe {
     }
 
     public Integer getNombreAnneeAnciennete() {
-        return LocalDate.now().getYear() - dateEmbauche.getYear();
+        if (dateEmbauche != null){
+            if(dateEmbauche.getYear() > LocalDate.now().getYear()){
+                return 0;
+            }
+            return LocalDate.now().getYear() - dateEmbauche.getYear();
+        }
+
+
+        return 0;
     }
 
     public Integer getNbConges() {
@@ -55,16 +63,29 @@ public class Employe {
         return getNbRtt(LocalDate.now());
     }
 
+    /**
+     * Calcul du nombre de RTT
+     * nbJoursAnnee : dépend de si l'année est bissextile ou non
+     * nbJoursReposHebdomadaire : nombre de samedi et dimanche dans l'année.
+     * Ce nombre est modifié si le 1er janvier tombe un jeudi, un vendredi (et si l'année est bissextile ou non), un samedi.
+     * nbJoursFeries : nombre de jours fériés dans l'année qui tombe un jour de la semaine (lundi au vendredi)
+     * Entreprise.NB_JOURS_MAX_FORFAIT : le nombre de jours travaillés dans l'année par les salariés de l'entreprise
+     * Entreprise.NB_CONGES_BASE : nombre de jours de congés de base des salariés (cadre légal ou conventionnel)
+     * On obtient le nombre de RTT en partant du nombre de jours dans l'année auquel on soustrait les variables précédemment définies,
+     * on multiplie ensuite cela par l'attribut temps partiel de l'employé (s'il est à temps partiel, il n'aura pas le même nombre de jours de Rtt)
+     * @param d (date actuelle)
+     * @return le nombre de jours de Rtt de l'employé
+     */
     public Integer getNbRtt(LocalDate d){
-        int i1 = d.isLeapYear() ? 365 : 366;
-        int var = 104;
+        int nbJoursAnnee = d.isLeapYear() ? 366 : 365;
+        int nbJoursReposHebdomadaire = 104;
         switch (LocalDate.of(d.getYear(),1,1).getDayOfWeek()){
-            case THURSDAY: if(d.isLeapYear()) var =  var + 1; break;
-            case FRIDAY: if(d.isLeapYear()) var =  var + 2; else var =  var + 1;
-            case SATURDAY: var = var + 1; break;
+            case THURSDAY: if(d.isLeapYear()) nbJoursReposHebdomadaire =  nbJoursReposHebdomadaire + 1; break;
+            case FRIDAY: if(d.isLeapYear()) nbJoursReposHebdomadaire =  nbJoursReposHebdomadaire + 2; else nbJoursReposHebdomadaire =  nbJoursReposHebdomadaire + 1; break;
+            case SATURDAY: nbJoursReposHebdomadaire = nbJoursReposHebdomadaire + 1; break;
         }
-        int monInt = (int) Entreprise.joursFeries(d).stream().filter(localDate -> localDate.getDayOfWeek().getValue() <= DayOfWeek.FRIDAY.getValue()).count();
-        return (int) Math.ceil((i1 - Entreprise.NB_JOURS_MAX_FORFAIT - var - Entreprise.NB_CONGES_BASE - monInt) * tempsPartiel);
+        int nbJoursFeries = (int) Entreprise.joursFeries(d).stream().filter(localDate -> localDate.getDayOfWeek().getValue() <= DayOfWeek.FRIDAY.getValue()).count();
+        return (int) Math.ceil((nbJoursAnnee - Entreprise.NB_JOURS_MAX_FORFAIT - nbJoursReposHebdomadaire - Entreprise.NB_CONGES_BASE - nbJoursFeries) * tempsPartiel);
     }
 
     /**
@@ -101,8 +122,15 @@ public class Employe {
         return prime * this.tempsPartiel;
     }
 
-    //Augmenter salaire
-    //public void augmenterSalaire(double pourcentage){}
+
+    public void augmenterSalaire(Integer pourcentage){
+
+        if (this.getSalaire() == 0) {}
+        else if(pourcentage <= 0){}
+        else {
+            this.setSalaire(this.getSalaire() + (this.getSalaire() * pourcentage / 100));
+        }
+    }
 
     public Long getId() {
         return id;
